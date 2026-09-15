@@ -1,0 +1,42 @@
+:root {
+  --p-dark: #03738C;
+  --p: #037F8C;
+  --accent: #9AD2D9;
+  --sec: #1F736A;
+  --bg: #F2F2F2;
+  --text: #12363A;
+  --white: #fff;
+  --danger: #B42318;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; min-height: 100%; font-family: Inter, Segoe UI, Arial, sans-serif; background: var(--bg); color: var(--text); }
+a { color: var(--p); text-decoration: none; }
+.layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar { background: var(--p-dark); color: #fff; padding: 20px 14px; }
+.sidebar h1 { font-size: 18px; margin: 0 0 4px; }
+.sidebar small { opacity: .8; }
+.sidebar nav { display: flex; flex-direction: column; gap: 6px; margin-top: 24px; }
+.sidebar a { color: #e8f6f8; padding: 8px 10px; border-radius: 8px; }
+.sidebar a.active, .sidebar a:hover { background: rgba(154,210,217,.25); }
+.main { padding: 24px 28px; }
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(3,115,140,.08); }
+.card h3 { margin: 0 0 6px; font-size: 13px; color: var(--p); font-weight: 600; }
+.card .n { font-size: 28px; font-weight: 700; }
+.btn { background: var(--p-dark); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn.sec { background: var(--sec); }
+.btn.ghost { background: transparent; color: var(--p-dark); border: 1px solid var(--accent); }
+input, select, textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid #c9e0e3; border-radius: 8px; font: inherit;
+}
+label { font-size: 12px; font-weight: 600; display: block; margin: 8px 0 4px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+th, td { padding: 10px 12px; border-bottom: 1px solid #e6f1f3; text-align: left; font-size: 13px; }
+th { background: var(--accent); }
+.login-wrap { min-height: 100vh; display: grid; place-items: center; background: linear-gradient(160deg, #03738C, #1F736A); }
+.login-card { background: #fff; width: 380px; padding: 28px; border-radius: 16px; }
+.err { color: var(--danger); font-size: 13px; }
+.search { max-width: 360px; }
+.muted { color: #5b7377; font-size: 12px; }

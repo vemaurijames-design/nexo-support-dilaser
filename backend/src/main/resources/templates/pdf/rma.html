@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<style>
+body{font-family:Arial,sans-serif;color:#12363A;font-size:12px;margin:24px}
+h1{background:#03738C;color:#fff;padding:10px 16px}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #cfe8ea;padding:8px;vertical-align:top}
+th{width:30%;background:#F2F2F2;text-align:left}
+</style>
+</head>
+<body>
+<h1>REQUEST RMA</h1>
+<p th:text="${r.numeroInterno}">NS-RMA</p>
+<table>
+<tr><th>CUSTOMER</th><td th:text="${r.customerSnapshot}"></td></tr>
+<tr><th>WARRANTY</th><td th:text="${r.enGarantia}"></td></tr>
+<tr><th>DESCRIPTION</th><td th:text="${r.descripcionItem}"></td></tr>
+<tr><th>INSTALLATION DATE</th><td th:text="${r.fechaInstalacion}"></td></tr>
+<tr><th>S/N</th><td th:text="${r.serialReportado}"></td></tr>
+<tr><th>REPORTED PROBLEM</th><td th:text="${r.problemaReportado}"></td></tr>
+<tr><th>PART N°</th><td th:text="${r.partNumber}"></td></tr>
+<tr><th>N° OF PULSES</th><td th:text="${r.numeroPulsos}"></td></tr>
+<tr><th>PURCHASE ORDER</th><td th:text="${r.purchaseOrder}"></td></tr>
+<tr><th>HP OUTPUT POWER</th><td th:text="${r.hpOutputPower}"></td></tr>
+<tr><th>ADDITIONAL DETAILS</th><td th:text="${r.detallesAdicionales}"></td></tr>
+<tr><th>ESTADO</th><td th:text="${r.estado}"></td></tr>
+</table>
+<p>Generado <span th:text="${hoy}"></span> · Dilaser S.A.</p>
+</body>
+</html>
