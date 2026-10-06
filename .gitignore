@@ -8,3 +8,38 @@ target/
 .idea/
 .vscode/
 *.iml
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+target/
+*.class
+*.jar
+
+# Entorno
+.env
+.env.local
+*.env
+application-local.properties
+application-local.yml
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Logs
+*.log
+logs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Vite cache
+.vite/
