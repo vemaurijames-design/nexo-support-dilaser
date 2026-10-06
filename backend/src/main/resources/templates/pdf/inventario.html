@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<style>
+body{font-family:Arial,sans-serif;color:#12363A;font-size:11px;margin:18px}
+h1{color:#03738C;font-size:18px;margin:0}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td,th{border:1px solid #9fd0d6;padding:4px}
+th{background:#03738C;color:#fff;text-align:left}
+</style>
+</head>
+<body>
+<h1>DILASER S.A. — Inventario soporte técnico</h1>
+<p th:text="${hoy}"></p>
+<table>
+<thead><tr><th>Referencia</th><th>Descripcion</th><th>Ubicacion</th><th>Bodega</th><th>Existencia</th><th>Costo</th></tr></thead>
+<tbody>
+<tr th:each="s : ${stock}">
+  <td th:text="${s.repuesto != null ? s.repuesto.referencia : ''}"></td>
+  <td th:text="${s.repuesto != null ? s.repuesto.descripcion : ''}"></td>
+  <td th:text="${s.repuesto != null ? s.repuesto.ubicacion : ''}"></td>
+  <td th:text="${s.bodega != null ? s.bodega.nombre : ''}"></td>
+  <td th:text="${s.existencia}"></td>
+  <td th:text="${s.repuesto != null ? s.repuesto.costoPromedio : ''}"></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

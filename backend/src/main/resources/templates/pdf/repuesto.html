@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/>
+<style>
+body{font-family:Arial,sans-serif;color:#12363A;font-size:12px;margin:24px}
+h1{color:#03738C;margin:0}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+td,th{border:1px solid #9fd0d6;padding:6px}
+th{background:#E8F4F6;text-align:left;width:180px}
+</style></head>
+<body>
+<h1>Ficha de repuesto</h1>
+<p>DILASER S.A. — <span th:text="${hoy}"></span></p>
+<table>
+<tr><th>Referencia</th><td th:text="${r.referencia}"></td></tr>
+<tr><th>Descripcion</th><td th:text="${r.descripcion}"></td></tr>
+<tr><th>Ubicacion</th><td th:text="${r.ubicacion}"></td></tr>
+<tr><th>Unidad</th><td th:text="${r.unidadMedida}"></td></tr>
+<tr><th>Minimo</th><td th:text="${r.stockMinimo}"></td></tr>
+<tr><th>Costo</th><td th:text="${r.costoPromedio}"></td></tr>
+<tr><th>Precio sugerido</th><td th:text="${r.precioSugerido}"></td></tr>
+<tr><th>Observaciones</th><td th:text="${r.observaciones}"></td></tr>
+</table>
+<h2>Stock por bodega</h2>
+<table>
+<tr><th>Bodega</th><th>Existencia</th></tr>
+<tr th:each="s : ${stock}"><td th:text="${s.bodega != null ? s.bodega.nombre : ''}"></td><td th:text="${s.existencia}"></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<style>
+body{font-family:Arial,sans-serif;color:#12363A;font-size:12px;margin:24px}
+h1{color:#03738C;margin:0}
+.bar{background:#03738C;color:#fff;padding:8px 12px;margin:12px 0}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #cfe8ea;padding:6px}
+th{background:#E8F4F6;text-align:left}
+.meta{width:100%;margin-bottom:10px}
+</style>
+</head>
+<body>
+<h1>DILASER — REMISIÓN</h1>
+<p th:text="${r.numero}">REM-00001</p>
+<div class="bar">Documento de salida</div>
+<table class="meta">
+<tr><th>Fecha</th><td th:text="${r.fecha}"></td><th>Factura</th><td th:text="${r.numeroFactura}"></td></tr>
+<tr><th>Cliente</th><td th:text="${r.clienteNombre}"></td><th>Teléfono</th><td th:text="${r.telefonoContacto}"></td></tr>
+<tr><th>Dirección</th><td th:text="${r.clienteDireccion}"></td><th>Guía</th><td th:text="${r.guiaNumero}"></td></tr>
+<tr><th>Transporte</th><td th:text="${r.transportadora}"></td><th>Motivo</th><td th:text="${r.motivo}"></td></tr>
+</table>
+<table>
+<thead><tr><th>Ref</th><th>Serie/Lote</th><th>Descripción</th><th>Motivo</th><th>Cant</th></tr></thead>
+<tbody>
+<tr th:each="i : ${items}">
+  <td th:text="${i.referencia}"></td>
+  <td th:text="${i.serialLote}"></td>
+  <td th:text="${i.descripcion}"></td>
+  <td th:text="${i.motivo}"></td>
+  <td th:text="${i.cantidad}"></td>
+</tr>
+</tbody>
+</table>
+<p><b>Observaciones:</b> <span th:text="${r.observaciones}"></span></p>
+<p>Elaboró: <span th:text="${r.elaboroNombre}"></span></p>
+<img th:if="${firmaImg != null}" th:src="${firmaImg}" alt="firma" style="height:70px"/>
+<p>Recibió: <span th:text="${r.recibioNombre}"></span></p>
+<p>Correo cliente: <span th:text="${r.emailDestino}"></span></p>
+</body>
+</html>

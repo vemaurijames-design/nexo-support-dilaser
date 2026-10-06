@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<style>
+body{font-family:Arial,sans-serif;color:#12363A;font-size:12px;margin:24px}
+h1{color:#03738C}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #cfe8ea;padding:6px}
+th{background:#E8F4F6;text-align:left}
+</style>
+</head>
+<body>
+<h1>Inventario — stock por bodega</h1>
+<p th:text="${hoy}"></p>
+<table>
+<thead><tr><th>Ref</th><th>Ítem</th><th>Bodega</th><th>Existencia</th></tr></thead>
+<tbody>
+<tr th:each="s : ${stock}">
+  <td th:text="${s.repuesto != null ? s.repuesto.referencia : ''}"></td>
+  <td th:text="${s.repuesto != null ? s.repuesto.descripcion : ''}"></td>
+  <td th:text="${s.bodega != null ? s.bodega.nombre : ''}"></td>
+  <td th:text="${s.existencia}"></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
