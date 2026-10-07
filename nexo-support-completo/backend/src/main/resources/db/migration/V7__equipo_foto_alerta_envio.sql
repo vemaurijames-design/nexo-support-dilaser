@@ -1,0 +1,5 @@
+ALTER TABLE equipos ADD COLUMN IF NOT EXISTS foto_nombre VARCHAR(180);
+ALTER TABLE equipos ADD COLUMN IF NOT EXISTS manual_nombre VARCHAR(180);
+ALTER TABLE alertas_mantenimiento ADD COLUMN IF NOT EXISTS enviado_en TIMESTAMPTZ;
+ALTER TABLE alertas_mantenimiento ADD COLUMN IF NOT EXISTS enviado_a VARCHAR(180);
+ALTER TABLE alertas_mantenimiento ADD COLUMN IF NOT EXISTS canal VARCHAR(20);

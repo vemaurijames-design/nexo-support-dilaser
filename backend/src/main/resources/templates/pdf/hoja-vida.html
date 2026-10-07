@@ -5,7 +5,7 @@
 <style>
 body{font-family:Arial,sans-serif;color:#12363A;font-size:12px;margin:24px}
 h1{background:#03738C;color:#fff;padding:10px 16px;margin:0}
-h2{color:#037F8C;border-bottom:2px solid #9AD2D9;padding-bottom:4px}
+h2{color:#03738C;border-bottom:2px solid #9AD2D9;padding-bottom:4px}
 table{width:100%;border-collapse:collapse;margin-bottom:16px}
 td,th{border:1px solid #cfe8ea;padding:6px 8px;text-align:left}
 th{background:#9AD2D9}
@@ -15,20 +15,19 @@ th{background:#9AD2D9}
 </head>
 <body>
 <h1>HOJA DE VIDA</h1>
-<p class="meta">Nexo Support · Dilaser S.A. · NIT 811.046.078-4 · Generado <span th:text="${hoy}">hoy</span></p>
+<p class="meta">Dilaser S.A. · NIT 811.046.078-4 · Generado <span th:text="${hoy}">hoy</span></p>
 <h2>DATOS DEL PROPIETARIO</h2>
 <table>
-<tr><th>Nombre / Institución</th><td th:text="${cliente}">Dilaser</td></tr>
-<tr><th>Serial</th><td th:text="${e.serial}">SN</td></tr>
-<tr><th>Ciudad</th><td th:text="${e.ciudadUbicacion}">Medellín</td></tr>
+<tr><th>Institución</th><td th:text="${cliente}">Dilaser</td><th>NIT</th><td th:text="${nit}"></td></tr>
+<tr><th>Ciudad</th><td th:text="${ciudad}"></td><th>Dirección</th><td th:text="${direccion}"></td></tr>
 </table>
 <h2>DATOS DEL EQUIPO</h2>
 <table>
 <tr><th>Tecnología</th><td th:text="${tec}"></td><th>Marca</th><td th:text="${marca}"></td></tr>
-<tr><th>Modelo</th><td th:text="${modelo}"></td><th>Serie</th><td th:text="${e.serial}"></td></tr>
-<tr><th>País origen</th><td th:text="${e.paisOrigen}"></td><th>Voltage</th><td th:text="${e.voltageAlimentacion}"></td></tr>
-<tr><th>Importación</th><td th:text="${e.fechaImportacion}"></td><th>Peso</th><td th:text="${e.pesoDeclarado}"></td></tr>
-<tr><th>Registro sanitario</th><td colspan="3" th:text="${e.registroSanitario}"></td></tr>
+<tr><th>Modelo</th><td th:text="${modelo}"></td><th>Serie</th><td th:text="${serial}"></td></tr>
+<tr><th>Nombre</th><td th:text="${nombre}"></td><th>Registro sanitario</th><td th:text="${invima}"></td></tr>
+<tr><th>País origen</th><td th:text="${pais}"></td><th>Voltage</th><td th:text="${voltage}"></td></tr>
+<tr><th>Importación</th><td th:text="${importacion}"></td><th>Peso</th><td th:text="${peso}"></td></tr>
 </table>
 <h2>LISTA DE CONTENIDO</h2>
 <table>
@@ -36,15 +35,17 @@ th{background:#9AD2D9}
 <tr th:each="a : ${accesorios}">
   <td th:text="${a.descripcion}"></td>
   <td th:text="${a.cantidad}"></td>
-  <td th:text="${a.serialAccesorio}"></td></tr>
+  <td th:text="${a.serial}"></td>
+</tr>
 </table>
 <h2>MANTENIMIENTOS REALIZADOS</h2>
 <table>
 <tr><th>Fecha</th><th>Actividades</th><th>Ingeniero</th></tr>
 <tr th:each="m : ${mants}">
-  <td th:text="${m.fechaRevision}"></td>
+  <td th:text="${m.fecha}"></td>
   <td th:text="${m.actividades}"></td>
-  <td th:text="${m.ingenieroNombre}"></td></tr>
+  <td th:text="${m.ingeniero}"></td>
+</tr>
 </table>
 <p class="footer">Documento generado por Nexo Support.</p>
 </body>

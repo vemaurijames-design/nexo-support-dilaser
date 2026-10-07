@@ -16,7 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -38,8 +40,35 @@ public class EquipoController {
     }
 
     @GetMapping
-    public List<Equipo> list(@RequestParam(required = false) String q, @RequestParam(required = false) String estado) {
-        return repo.search(q, estado);
+    public List<Map<String, Object>> list(@RequestParam(required = false) String q, @RequestParam(required = false) String estado) {
+        return repo.search(q == null ? "" : q, estado == null ? "" : estado).stream().map(this::resumen).toList();
+    }
+
+    private Map<String, Object> resumen(Equipo e) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", e.getId());
+        m.put("serial", e.getSerial());
+        m.put("nombreEquipo", e.getNombreEquipo());
+        m.put("estado", e.getEstado());
+        m.put("registroSanitario", e.getRegistroSanitario());
+        m.put("ciudadUbicacion", e.getCiudadUbicacion());
+        m.put("direccionUbicacion", e.getDireccionUbicacion());
+        m.put("institucionNombre", e.getInstitucionNombre());
+        m.put("fechaInstalacion", e.getFechaInstalacion());
+        m.put("periodicidadMantenimiento", e.getPeriodicidadMantenimiento());
+        if (e.getModelo() != null) {
+            m.put("modelo", Map.of("id", e.getModelo().getId(), "nombre", e.getModelo().getNombre()));
+        }
+        if (e.getCliente() != null) {
+            m.put("clienteNit", e.getCliente().getNit());
+            m.put("cliente", Map.of(
+                    "id", e.getCliente().getId(),
+                    "razonSocial", e.getCliente().getRazonSocial() == null ? "" : e.getCliente().getRazonSocial(),
+                    "nit", e.getCliente().getNit() == null ? "" : e.getCliente().getNit(),
+                    "emailPrincipal", e.getCliente().getEmailPrincipal() == null ? "" : e.getCliente().getEmailPrincipal()
+            ));
+        }
+        return m;
     }
 
     @GetMapping("/{id}")
@@ -57,12 +86,14 @@ public class EquipoController {
         if (in.getAccesorios() != null) in.getAccesorios().forEach(a -> a.setEquipo(in));
         Equipo saved = repo.save(in);
         LocalDate ancla = saved.getFechaInstalacion() != null ? saved.getFechaInstalacion() : LocalDate.now();
+        String per = saved.getPeriodicidadMantenimiento() == null ? "ANUAL" : saved.getPeriodicidadMantenimiento();
+        LocalDate proximo = per.toUpperCase().contains("SEM") ? ancla.plusMonths(6) : ancla.plusYears(1);
         planes.save(PlanMantenimiento.builder()
                 .equipo(saved)
-                .periodicidad(saved.getModelo() != null ? saved.getModelo().getPeriodicidadDefault() : "ANUAL")
+                .periodicidad(per)
                 .mesAncla(ancla.getMonthValue())
                 .diaAncla(Math.min(ancla.getDayOfMonth(), 28))
-                .proximoProgramado(ancla.plusYears(1))
+                .proximoProgramado(proximo)
                 .activo(true)
                 .build());
         return saved;
@@ -149,7 +180,33 @@ public class EquipoController {
         return m;
     }
 
+    @PostMapping("/{id}/foto")
+    public Map<String, String> foto(@PathVariable UUID id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws Exception {
+        Equipo e = get(id);
+        java.nio.file.Path dir = java.nio.file.Path.of("uploads", "equipos");
+        java.nio.file.Files.createDirectories(dir);
+        String name = id + "-foto.jpg";
+        java.nio.file.Files.write(dir.resolve(name), file.getBytes());
+        e.setFotoNombre(name);
+        repo.save(e);
+        return Map.of("fotoNombre", name);
+    }
+
+    @PostMapping("/{id}/manual")
+    public Map<String, String> manual(@PathVariable UUID id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws Exception {
+        Equipo e = get(id);
+        java.nio.file.Path dir = java.nio.file.Path.of("uploads", "equipos");
+        java.nio.file.Files.createDirectories(dir);
+        String name = id + "-manual.pdf";
+        java.nio.file.Files.write(dir.resolve(name), file.getBytes());
+        e.setManualNombre(name);
+        e.setManuales(file.getOriginalFilename());
+        repo.save(e);
+        return Map.of("manualNombre", name);
+    }
+
     @GetMapping("/{id}/hoja-vida.pdf")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<byte[]> pdf(@PathVariable UUID id) {
         Equipo e = get(id);
         byte[] bytes = pdf.hojaVida(e);

@@ -78,6 +78,28 @@ public class InventarioService {
         return movimientos.save(m);
     }
 
+    public void descontarVenta(String referencia, java.math.BigDecimal cantidad, String documento, Usuario u) {
+        if (referencia == null || referencia.isBlank() || cantidad == null) return;
+        Repuesto r = repuestos.findAll().stream()
+                .filter(x -> referencia.equalsIgnoreCase(x.getReferencia()))
+                .findFirst().orElse(null);
+        if (r == null) return;
+        StockBodega s = stocks.findByRepuestoId(r.getId()).stream()
+                .filter(x -> x.getExistencia() != null && x.getExistencia().compareTo(cantidad) >= 0)
+                .findFirst().orElse(null);
+        if (s == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Sin stock para " + referencia);
+        }
+        InventarioMovimiento m = new InventarioMovimiento();
+        m.setRepuesto(r);
+        m.setTipo("SALIDA_VENTA");
+        m.setCantidad(cantidad);
+        m.setBodegaOrigen(s.getBodega());
+        m.setDocumentoRef(documento);
+        m.setObservaciones("Salida por remisión " + documento);
+        mover(m, u);
+    }
+
     private Bodega resolveBodega(Bodega b) {
         if (b == null || b.getId() == null) throw new ApiException(HttpStatus.BAD_REQUEST, "Bodega requerida");
         return bodegas.findById(b.getId()).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Bodega inválida"));

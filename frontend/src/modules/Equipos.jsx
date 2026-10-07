@@ -14,7 +14,7 @@ const empty = {
   tecnologiaPredominante: '', fuenteAlimentacion: '', clasificacionBiomedica: '',
   nivelRiesgo: '', usoClinico: '', requiereCalibracion: false,
   periodicidadCalibracion: 'Anual', periodicidadMantenimiento: 'Semestral',
-  manuales: '', planos: '', recomendacionesFabricante: '', observaciones: '',
+  manuales: '', planos: '', recomendacionesFabricante: '', observaciones: '', accesorios: [{ descripcion: '', cantidad: 1, serialAccesorio: '' }],
   pulsosActuales: '', potenciaSalidaHp: ''
 }
 
@@ -88,7 +88,7 @@ export default function Equipos() {
         <table>
           <thead>
             <tr>
-              <th>Serial</th><th>Equipo</th><th>Cliente / Institución</th>
+              <th>Serial</th><th>Equipo</th><th>Cliente / Institución</th><th>NIT</th>
               <th>Reg. sanitario</th><th>Ciudad</th><th>Estado</th><th></th>
             </tr>
           </thead>
@@ -98,6 +98,7 @@ export default function Equipos() {
                 <td><strong>{r.serial}</strong></td>
                 <td>{r.nombreEquipo || r.modelo?.nombre || '—'}</td>
                 <td>{r.cliente?.razonSocial || r.institucionNombre || '—'}</td>
+                <td>{r.clienteNit || r.cliente?.nit || '—'}</td>
                 <td>{r.registroSanitario}</td>
                 <td>{r.ciudadUbicacion}</td>
                 <td><span className="tag">{r.estado}</span></td>
@@ -157,13 +158,18 @@ export default function Equipos() {
                         ...prev,
                         clienteId: id,
                         institucionNombre: c?.razonSocial || prev.institucionNombre,
+                        clienteNit: c?.nit || '',
                         ciudadUbicacion: c?.ciudad || prev.ciudadUbicacion,
                         direccionUbicacion: c?.direccion || prev.direccionUbicacion
                       }))
                     }}>
                       <option value="">— Dilaser / sin asignar —</option>
-                      {clientes.map(c => <option key={c.id} value={c.id}>{c.razonSocial}</option>)}
+                      {clientes.map(c => <option key={c.id} value={c.id}>{c.razonSocial}{c.nit ? ' · NIT ' + c.nit : ''}</option>)}
                     </select>
+                  </div>
+                  <div className="field">
+                    <label>NIT del cliente</label>
+                    <input readOnly value={form.clienteNit || clientes.find(c => c.id === form.clienteId)?.nit || ''} />
                   </div>
                   <div className="field">
                     <label>Institución / nombre</label>
@@ -253,6 +259,15 @@ export default function Equipos() {
                       <option value="DILASER_ALQUILER">Dilaser alquiler</option>
                       <option value="DILASER_DEMO">Dilaser demo</option>
                       <option value="DILASER_STOCK">Dilaser stock</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Estado del equipo</label>
+                    <select value={form.estado || 'ACTIVO'} onChange={e => f('estado', e.target.value)}>
+                      <option value="ACTIVO">Activo</option>
+                      <option value="DE_BAJA">De baja</option>
+                      <option value="DISPOSICION_FINAL">Disposición final</option>
+                      <option value="OTRO">Otro</option>
                     </select>
                   </div>
                   <div className="field">
@@ -397,12 +412,47 @@ export default function Equipos() {
                 <div className="form-row cols-2">
                   <div className="field">
                     <label>Manuales</label>
-                    <textarea rows={2} value={form.manuales || ''} onChange={e => f('manuales', e.target.value)} />
+                    <textarea rows={2} value={form.manuales || ''} onChange={e => f('manuales', e.target.value)} placeholder="Manual de servicio, lista de chequeo" />
                   </div>
+                </div>
+                <div className="field">
+                  <label>Accesorios / contenido</label>
+                  {(form.accesorios || []).map((a, i) => (
+                    <div key={i} className="form-row cols-3">
+                      <input placeholder="Descripción" value={a.descripcion || ''} onChange={e => {
+                        const acc = [...form.accesorios]; acc[i] = { ...acc[i], descripcion: e.target.value }; f('accesorios', acc)
+                      }} />
+                      <input type="number" placeholder="Cantidad" value={a.cantidad || 1} onChange={e => {
+                        const acc = [...form.accesorios]; acc[i] = { ...acc[i], cantidad: e.target.value }; f('accesorios', acc)
+                      }} />
+                      <input placeholder="Serial accesorio" value={a.serialAccesorio || ''} onChange={e => {
+                        const acc = [...form.accesorios]; acc[i] = { ...acc[i], serialAccesorio: e.target.value }; f('accesorios', acc)
+                      }} />
+                    </div>
+                  ))}
+                  <button type="button" className="btn ghost sm" onClick={() => f('accesorios', [...(form.accesorios || []), { descripcion: '', cantidad: 1, serialAccesorio: '' }])}>+ Accesorio</button>
+                </div>
+                <div className="form-row cols-2">
                   <div className="field">
-                    <label>Planos</label>
-                    <textarea rows={2} value={form.planos || ''} onChange={e => f('planos', e.target.value)} />
+                    <label>Foto del equipo</label>
+                    <input type="file" accept="image/*" onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (!file || !form.id) { setErr('Guarda la hoja primero y luego adjunta la foto'); return }
+                      const fd = new FormData(); fd.append('file', file)
+                      await api.post(`/api/equipos/${form.id}/foto`, fd)
+                      f('fotoNombre', file.name)
+                    }} />
                   </div>
+                </div>
+                <div className="field">
+                  <label>Manual adjunto</label>
+                  <input type="file" accept=".pdf,image/*" onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file || !form.id) { setErr('Guarda la hoja primero y luego adjunta el manual'); return }
+                    const fd = new FormData(); fd.append('file', file)
+                    await api.post(`/api/equipos/${form.id}/manual`, fd)
+                    f('manualNombre', file.name)
+                  }} />
                 </div>
                 <div className="field">
                   <label>Recomendaciones del fabricante</label>

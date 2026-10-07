@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import co.dilaser.nexo.equipo.HojaVidaMantenimientoRepository;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,19 +21,23 @@ public class MantenimientoController {
     private final AlertaMantenimientoRepository alertas;
     private final AlertScheduler scheduler;
     private final EmailService email;
+    private final HojaVidaMantenimientoRepository historial;
 
     public MantenimientoController(PlanMantenimientoRepository planes, AlertaMantenimientoRepository alertas,
-                                   AlertScheduler scheduler, EmailService email) {
+                                   AlertScheduler scheduler, EmailService email,
+                                   HojaVidaMantenimientoRepository historial) {
         this.planes = planes;
         this.alertas = alertas;
         this.scheduler = scheduler;
         this.email = email;
+        this.historial = historial;
     }
 
     @GetMapping("/planes")
     public List<PlanMantenimiento> planes() { return planes.findAll(); }
 
     @GetMapping("/alertas")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<AlertaMantenimiento> alertas(@RequestParam(required = false) Integer anio,
                                              @RequestParam(required = false) Integer mes) {
         if (anio != null && mes != null) return alertas.findByAnioAndMes(anio, mes);
@@ -79,6 +85,27 @@ public class MantenimientoController {
         } catch (Exception e) {
             throw new ApiException(HttpStatus.BAD_GATEWAY, "No se pudo enviar: " + e.getMessage());
         }
+        a.setEstado("ENVIADA");
+        a.setCanal("EMAIL");
+        a.setEnviadoA(to);
+        a.setEnviadoEn(java.time.OffsetDateTime.now());
+        alertas.save(a);
         return Map.of("message", "Recordatorio enviado a " + to);
+    }
+
+    @GetMapping("/historial")
+    public List<Map<String, Object>> historial() {
+        return historial.findAll().stream().map(h -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", h.getId());
+            m.put("fecha", h.getFechaRevision());
+            m.put("actividades", h.getActividades());
+            m.put("tipo", h.getTipo());
+            m.put("ingeniero", h.getIngenieroNombre());
+            m.put("serial", h.getEquipo() != null ? h.getEquipo().getSerial() : "");
+            m.put("cliente", h.getEquipo() != null && h.getEquipo().getCliente() != null
+                    ? h.getEquipo().getCliente().getRazonSocial() : "");
+            return m;
+        }).toList();
     }
 }

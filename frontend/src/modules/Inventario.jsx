@@ -143,7 +143,28 @@ export default function Inventario() {
       <div className="toolbar">
         <input className="search" placeholder="Filtrar por referencia o descripción…"
           value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === 'Enter' && load()} />
-        <button className="btn ghost" onClick={load}>Buscar</button>
+        <button className="btn ghost" onClick={async () => {
+          if (!('BarcodeDetector' in window)) {
+            setErr('Este navegador no lee códigos. Usa Chrome y permite la cámara.')
+            return
+          }
+          const det = new window.BarcodeDetector({ formats: ['code_128', 'ean_13', 'qr_code', 'code_39'] })
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          const video = document.createElement('video')
+          video.srcObject = stream
+          await video.play()
+          const timer = setInterval(async () => {
+            const codes = await det.detect(video)
+            if (codes[0]) {
+              clearInterval(timer)
+              stream.getTracks().forEach(t => t.stop())
+              setQ(codes[0].rawValue)
+              const hit = rows.find(r => r.referencia === codes[0].rawValue)
+              if (hit) ver(hit)
+              else setMsg('Código leído: ' + codes[0].rawValue)
+            }
+          }, 400)
+        }}>Leer código</button>
         <label className="btn ghost" style={{ cursor: 'pointer' }}>
           {sendingXls ? 'Importando…' : 'Importar Excel'}
           <input type="file" accept=".xlsx,.xls" hidden onChange={async e => {
@@ -183,7 +204,13 @@ export default function Inventario() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(r => {
+            {[...rows].sort((a, b) => {
+              const ta = stockByRepuesto[a.id]?.total ?? 0
+              const tb = stockByRepuesto[b.id]?.total ?? 0
+              const ba = ta <= Number(a.stockMinimo || 0) ? 0 : 1
+              const bb = tb <= Number(b.stockMinimo || 0) ? 0 : 1
+              return ba - bb || ta - tb
+            }).map(r => {
               const tot = stockByRepuesto[r.id]?.total ?? 0
               const bajo = tot <= Number(r.stockMinimo || 0)
               return (

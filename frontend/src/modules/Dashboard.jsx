@@ -27,19 +27,16 @@ export default function Dashboard() {
         <div className="card"><h3>Valor inventario</h3><div className="n">{Number(k?.valorInventario || 0).toLocaleString('es-CO')}</div></div>
       </div>
       <div className="card" style={{ marginTop: 16 }}>
-        <h3>Comparativo</h3>
-        <svg viewBox="0 0 640 220" width="100%" height="220">
-          {items.map(([t, n], i) => {
-            const h = Math.round((n / max) * 150)
-            const x = 40 + i * 120
-            return (
-              <g key={t}>
-                <rect x={x} y={180 - h} width="70" height={h} rx="6" fill="#03738C" />
-                <text x={x + 35} y={174 - h} textAnchor="middle" fontSize="12" fill="#12363A">{n}</text>
-                <text x={x + 35} y="202" textAnchor="middle" fontSize="11" fill="#03738C">{t}</text>
-              </g>
-            )
-          })}
+        <h3>Tendencia</h3>
+        <svg viewBox="0 0 640 180" width="100%" height="180">
+          <polyline fill="none" stroke="#03738C" strokeWidth="3"
+            points={items.map(([, n], i) => `${40 + i * 120},${160 - Math.round((n / max) * 120)}`).join(' ')} />
+          {items.map(([t, n], i) => (
+            <g key={t}>
+              <circle cx={40 + i * 120} cy={160 - Math.round((n / max) * 120)} r="5" fill="#03738C" />
+              <text x={40 + i * 120} y="176" textAnchor="middle" fontSize="11" fill="#35575c">{t}</text>
+            </g>
+          ))}
         </svg>
       </div>
     </div>

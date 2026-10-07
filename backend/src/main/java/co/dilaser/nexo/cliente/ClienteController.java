@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,9 +35,17 @@ public class ClienteController {
     }
 
     @GetMapping("/{id}/equipos")
-    public List<Equipo> equipos(@PathVariable UUID id) {
+    public List<Map<String, Object>> equipos(@PathVariable UUID id) {
         get(id);
-        return equipos.findByCliente_Id(id);
+        return equipos.findByCliente_Id(id).stream().map(e -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", e.getId());
+            m.put("serial", e.getSerial());
+            m.put("nombreEquipo", e.getNombreEquipo());
+            m.put("estado", e.getEstado());
+            m.put("modelo", e.getModelo() == null ? "" : e.getModelo().getNombre());
+            return m;
+        }).toList();
     }
 
     @PostMapping

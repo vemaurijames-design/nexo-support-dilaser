@@ -2,6 +2,8 @@ package co.dilaser.nexo.equipo;
 
 import co.dilaser.nexo.catalogo.ModeloEquipo;
 import co.dilaser.nexo.cliente.Cliente;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -165,12 +167,20 @@ public class Equipo {
     @Column(name = "potencia_salida_hp")
     private String potenciaSalidaHp;
 
+    @Column(name = "foto_nombre")
+    private String fotoNombre;
+
+    @Column(name = "manual_nombre")
+    private String manualNombre;
+
     private String observaciones;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<EquipoAccesorio> accesorios = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<HojaVidaMantenimiento> mantenimientos = new ArrayList<>();
@@ -180,6 +190,17 @@ public class Equipo {
 
     @Column(name = "actualizado_en")
     private OffsetDateTime actualizadoEn;
+
+    @JsonIgnore
+    public List<EquipoAccesorio> getAccesorios() { return accesorios; }
+
+    @JsonIgnore
+    public List<HojaVidaMantenimiento> getMantenimientos() { return mantenimientos; }
+
+    @JsonProperty("clienteNit")
+    public String getClienteNit() {
+        return cliente == null ? null : cliente.getNit();
+    }
 
     @PrePersist
     void pre() {

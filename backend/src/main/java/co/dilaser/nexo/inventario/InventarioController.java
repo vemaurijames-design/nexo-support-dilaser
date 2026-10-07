@@ -15,7 +15,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -148,8 +147,11 @@ public class InventarioController {
                     .append("</td><td>").append(a.get("minimo")).append("</td></tr>");
         }
         html.append("</table><p>Solicitar compra o traslado.</p>");
+        byte[] xls = excel.exportar();
         email.sendHtml(List.of(to), u == null ? List.of() : List.of(u.getEmail()),
-                "Alerta stock mínimo Nexo Support", html.toString(), null, null);
+                "Alerta stock mínimo Nexo Support",
+                "<p>Adjunto el Excel con los repuestos en mínimo o sin stock. Solicitar compra.</p>",
+                xls, "alertas-stock.xlsx");
         return Map.of("enviados", bajas.size(), "to", to);
     }
 

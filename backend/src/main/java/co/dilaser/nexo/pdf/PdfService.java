@@ -24,16 +24,45 @@ public class PdfService {
 
     public byte[] hojaVida(Equipo e) {
         Context ctx = new Context();
-        ctx.setVariable("e", e);
-        ctx.setVariable("modelo", e.getModelo() != null ? e.getModelo().getNombre() : "");
-        ctx.setVariable("marca", e.getModelo() != null && e.getModelo().getMarca() != null ? e.getModelo().getMarca().getNombre() : "");
-        ctx.setVariable("tec", e.getModelo() != null && e.getModelo().getTecnologia() != null ? e.getModelo().getTecnologia().getNombre() : "");
-        ctx.setVariable("cliente", e.getCliente() != null ? e.getCliente().getRazonSocial() : "DILASER S.A.");
-        ctx.setVariable("accesorios", e.getAccesorios() == null ? java.util.List.<EquipoAccesorio>of() : e.getAccesorios());
-        ctx.setVariable("mants", e.getMantenimientos() == null ? java.util.List.<HojaVidaMantenimiento>of() : e.getMantenimientos());
         ctx.setVariable("hoy", LocalDate.now().format(FMT));
+        ctx.setVariable("serial", nz(e.getSerial()));
+        ctx.setVariable("nombre", nz(e.getNombreEquipo()));
+        ctx.setVariable("ciudad", nz(e.getCiudadUbicacion()));
+        ctx.setVariable("direccion", nz(e.getDireccionUbicacion()));
+        ctx.setVariable("pais", nz(e.getPaisOrigen()));
+        ctx.setVariable("voltage", nz(e.getVoltageAlimentacion()));
+        ctx.setVariable("peso", nz(e.getPesoDeclarado()));
+        ctx.setVariable("invima", nz(e.getRegistroSanitario()));
+        ctx.setVariable("importacion", e.getFechaImportacion() == null ? "" : e.getFechaImportacion().format(FMT));
+        ctx.setVariable("modelo", e.getModelo() != null ? nz(e.getModelo().getNombre()) : "");
+        ctx.setVariable("marca", e.getModelo() != null && e.getModelo().getMarca() != null ? nz(e.getModelo().getMarca().getNombre()) : "");
+        ctx.setVariable("tec", e.getModelo() != null && e.getModelo().getTecnologia() != null ? nz(e.getModelo().getTecnologia().getNombre()) : nz(e.getTecnologiaPredominante()));
+        ctx.setVariable("cliente", e.getCliente() != null ? nz(e.getCliente().getRazonSocial()) : "DILASER S.A.");
+        ctx.setVariable("nit", e.getCliente() != null ? nz(e.getCliente().getNit()) : "811.046.078-4");
+        java.util.List<java.util.Map<String, String>> acc = new java.util.ArrayList<>();
+        if (e.getAccesorios() != null) {
+            for (EquipoAccesorio a : e.getAccesorios()) {
+                acc.add(java.util.Map.of(
+                        "descripcion", nz(a.getDescripcion()),
+                        "cantidad", a.getCantidad() == null ? "1" : a.getCantidad().toPlainString(),
+                        "serial", nz(a.getSerialAccesorio())));
+            }
+        }
+        java.util.List<java.util.Map<String, String>> mants = new java.util.ArrayList<>();
+        if (e.getMantenimientos() != null) {
+            for (HojaVidaMantenimiento h : e.getMantenimientos()) {
+                mants.add(java.util.Map.of(
+                        "fecha", h.getFechaRevision() == null ? "" : h.getFechaRevision().format(FMT),
+                        "actividades", nz(h.getActividades()),
+                        "ingeniero", nz(h.getIngenieroNombre())));
+            }
+        }
+        ctx.setVariable("accesorios", acc);
+        ctx.setVariable("mants", mants);
         return render("pdf/hoja-vida", ctx);
     }
+
+    private static String nz(String s) { return s == null ? "" : s; }
 
     public byte[] rma(RmaCaso r) {
         Context ctx = new Context();

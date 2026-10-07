@@ -2,6 +2,7 @@ package co.dilaser.nexo.remision;
 
 import co.dilaser.nexo.common.ApiException;
 import co.dilaser.nexo.notificacion.EmailService;
+import co.dilaser.nexo.inventario.InventarioService;
 import co.dilaser.nexo.pdf.PdfService;
 import co.dilaser.nexo.usuario.Usuario;
 import org.springframework.http.HttpHeaders;
@@ -24,11 +25,14 @@ public class RemisionController {
     private final RemisionRepository repo;
     private final PdfService pdf;
     private final EmailService emailService;
+    private final InventarioService inventario;
 
-    public RemisionController(RemisionRepository repo, PdfService pdf, EmailService emailService) {
+    public RemisionController(RemisionRepository repo, PdfService pdf, EmailService emailService,
+                              InventarioService inventario) {
         this.repo = repo;
         this.pdf = pdf;
         this.emailService = emailService;
+        this.inventario = inventario;
     }
 
     @GetMapping
@@ -60,7 +64,9 @@ public class RemisionController {
         r.setCreadoPor(u != null ? u.getId() : null);
         r.setActualizadoPor(u != null ? u.getId() : null);
         attachItems(r, body.getItems());
-        return repo.save(r);
+        Remision saved = repo.save(r);
+        descontar(saved, u);
+        return saved;
     }
 
     @PutMapping("/{id}")
@@ -126,6 +132,16 @@ public class RemisionController {
         repo.save(r);
         return Map.of("message", "Remisión enviada a " + String.join(", ", to),
                 "enviadoPor", u != null ? u.getEmail() : "");
+    }
+
+    private void descontar(Remision r, Usuario u) {
+        if (r.getItems() == null) return;
+        for (RemisionItem it : r.getItems()) {
+            String motivo = it.getMotivo() == null ? r.getMotivo() : it.getMotivo();
+            if (motivo != null && motivo.toUpperCase().contains("VENTA")) {
+                inventario.descontarVenta(it.getReferencia(), it.getCantidad(), r.getNumero(), u);
+            }
+        }
     }
 
     private void apply(Remision r, Remision body) {

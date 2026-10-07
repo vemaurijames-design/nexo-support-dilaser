@@ -1,0 +1,3 @@
+ALTER TABLE alertas_mantenimiento DROP CONSTRAINT IF EXISTS alertas_mantenimiento_equipo_id_anio_key;
+ALTER TABLE alertas_mantenimiento DROP CONSTRAINT IF EXISTS alertas_mantenimiento_equipo_id_anio_mes_key;
+ALTER TABLE alertas_mantenimiento ADD CONSTRAINT alertas_mantenimiento_equipo_id_anio_mes_key UNIQUE (equipo_id, anio, mes);

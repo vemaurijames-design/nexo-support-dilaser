@@ -231,7 +231,7 @@ export default function Clientes() {
                     <tr key={e.id}>
                       <td><strong>{e.serial}</strong></td>
                       <td>{e.nombreEquipo || '—'}</td>
-                      <td>{e.modelo?.nombre || '—'}</td>
+                      <td>{typeof e.modelo === 'string' ? e.modelo : (e.modelo?.nombre || '—')}</td>
                       <td>{e.estado}</td>
                       <td>
                         <a className="btn ghost sm" href={`${api.defaults.baseURL || 'http://localhost:8080'}/api/equipos/${e.id}/hoja-vida.pdf`} target="_blank" rel="noreferrer"
