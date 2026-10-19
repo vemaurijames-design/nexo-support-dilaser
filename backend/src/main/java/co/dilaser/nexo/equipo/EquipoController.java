@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -72,7 +73,40 @@ public class EquipoController {
     }
 
     @GetMapping("/{id}")
-    public Equipo get(@PathVariable UUID id) {
+    @Transactional
+    public Map<String, Object> getById(@PathVariable UUID id) {
+        Equipo e = find(id);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", e.getId());
+        m.put("serial", e.getSerial());
+        m.put("nombreEquipo", e.getNombreEquipo());
+        m.put("estado", e.getEstado());
+        m.put("propiedad", e.getPropiedad());
+        m.put("institucionNombre", e.getInstitucionNombre());
+        m.put("servicioUbicacion", e.getServicioUbicacion());
+        m.put("codigoInterno", e.getCodigoInterno());
+        m.put("ciudadUbicacion", e.getCiudadUbicacion());
+        m.put("direccionUbicacion", e.getDireccionUbicacion());
+        m.put("registroSanitario", e.getRegistroSanitario());
+        m.put("fechaInstalacion", e.getFechaInstalacion());
+        m.put("garantiaInicio", e.getGarantiaInicio());
+        m.put("garantiaFin", e.getGarantiaFin());
+        m.put("periodicidadMantenimiento", e.getPeriodicidadMantenimiento());
+        if (e.getModelo() != null) m.put("modelo", Map.of("id", e.getModelo().getId(), "nombre", e.getModelo().getNombre()));
+        if (e.getCliente() != null) {
+            m.put("clienteId", e.getCliente().getId());
+            m.put("clienteNit", e.getCliente().getNit());
+            m.put("cliente", Map.of("id", e.getCliente().getId(), "razonSocial", e.getCliente().getRazonSocial()));
+        }
+        m.put("accesorios", e.getAccesorios() == null ? List.of() : e.getAccesorios().stream().map(a -> Map.of(
+                "descripcion", a.getDescripcion() == null ? "" : a.getDescripcion(),
+                "cantidad", a.getCantidad() == null ? 1 : a.getCantidad(),
+                "serialAccesorio", a.getSerialAccesorio() == null ? "" : a.getSerialAccesorio()
+        )).toList());
+        return m;
+    }
+
+    private Equipo find(UUID id) {
         return repo.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Equipo no existe"));
     }
 
@@ -102,7 +136,7 @@ public class EquipoController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN','LIDER_AREA','INGENIERO')")
     public Equipo update(@PathVariable UUID id, @RequestBody Equipo in) {
-        Equipo e = get(id);
+        Equipo e = find(id);
         e.setSerial(in.getSerial());
         e.setPropiedad(in.getPropiedad());
         e.setEstado(in.getEstado());
@@ -172,7 +206,7 @@ public class EquipoController {
     @PostMapping("/{id}/mantenimientos")
     @PreAuthorize("hasAnyRole('SUPERADMIN','LIDER_AREA','INGENIERO')")
     public HojaVidaMantenimiento addMant(@PathVariable UUID id, @RequestBody HojaVidaMantenimiento m) {
-        Equipo e = get(id);
+        Equipo e = find(id);
         m.setId(null);
         m.setEquipo(e);
         e.getMantenimientos().add(m);
@@ -182,7 +216,7 @@ public class EquipoController {
 
     @PostMapping("/{id}/foto")
     public Map<String, String> foto(@PathVariable UUID id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws Exception {
-        Equipo e = get(id);
+        Equipo e = find(id);
         java.nio.file.Path dir = java.nio.file.Path.of("uploads", "equipos");
         java.nio.file.Files.createDirectories(dir);
         String name = id + "-foto.jpg";
@@ -194,7 +228,7 @@ public class EquipoController {
 
     @PostMapping("/{id}/manual")
     public Map<String, String> manual(@PathVariable UUID id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws Exception {
-        Equipo e = get(id);
+        Equipo e = find(id);
         java.nio.file.Path dir = java.nio.file.Path.of("uploads", "equipos");
         java.nio.file.Files.createDirectories(dir);
         String name = id + "-manual.pdf";
@@ -208,7 +242,7 @@ public class EquipoController {
     @GetMapping("/{id}/hoja-vida.pdf")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<byte[]> pdf(@PathVariable UUID id) {
-        Equipo e = get(id);
+        Equipo e = find(id);
         byte[] bytes = pdf.hojaVida(e);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=HV-" + e.getSerial() + ".pdf")

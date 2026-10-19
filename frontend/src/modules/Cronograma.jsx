@@ -36,9 +36,8 @@ export default function Cronograma() {
   const enviar = async (a) => {
     const to = window.prompt('Correo del cliente')
     if (!to) return
+    const cuerpo = window.prompt('Observación para el cliente', 'Quedamos atentos para agendar la visita de mantenimiento.') || ''
     const cc = localStorage.getItem('nexo_email') || ''
-    const garantia = tipo(a) === 'GARANTÍA'
-    const cuerpo = `Equipo ${a.equipo?.serial || ''} de ${a.cliente?.razonSocial || ''}. Servicio ${garantia ? 'en garantía' : 'normal'} programado para ${a.fechaObjetivo}. Si desea agendarlo, responda este correo o comuníquese con soporte técnico Dilaser.`
     try {
       await http.post(`/mantenimiento/alertas/${a.id}/notificar`, { to, cc, cuerpo })
       setMsg('Notificación enviada. Copia a ' + (cc || 'tu usuario'))
@@ -59,6 +58,17 @@ export default function Cronograma() {
           <p className="muted">Mes y día del servicio · garantía o normal · correo con copia al emisor</p>
         </div>
         <button className="btn" onClick={recalcular}>Recalcular alertas</button>
+        <button className="btn ghost" onClick={() => document.getElementById('excel-cron').click()}>Importar Excel</button>
+        <input id="excel-cron" type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={async e => {
+          const f = e.target.files?.[0]
+          if (!f) return
+          const fd = new FormData(); fd.append('file', f)
+          try {
+            await http.post('/mantenimiento/importar', fd)
+            setMsg('Excel importado. Recalcula las alertas.')
+            load()
+          } catch (ex) { setErr('No se pudo importar') }
+        }} />
       </div>
       {err && <div className="alert error">{err}</div>}
       {msg && <div className="alert ok">{msg}</div>}

@@ -139,7 +139,7 @@ export default function Remisiones() {
                 <td>{r.fecha}</td>
                 <td>{r.clienteNombre}</td>
                 <td>{r.elaboroNombre || '—'}</td>
-                <td>{r.firmaElaboro || '—'}</td>
+                <td>{r.firmaElaboro ? 'Firmada' : 'Sin firma'}</td>
                 <td><span className="tag">{r.estado}</span></td>
                 <td>
                   <button className="btn ghost sm" onClick={() => {

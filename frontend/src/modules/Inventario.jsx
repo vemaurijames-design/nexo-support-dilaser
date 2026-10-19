@@ -342,7 +342,7 @@ export default function Inventario() {
                 </div>
                 <div className="field">
                   <label>Stock mínimo</label>
-                  <input type="number" step="0.01" value={form.stockMinimo || 0} onChange={e => setForm({ ...form, stockMinimo: e.target.value })} />
+                  <input type="number" step="1" min="0" value={form.stockMinimo || 0} onChange={e => setForm({ ...form, stockMinimo: e.target.value })} />
                 </div>
               </div>
               <div className="field">

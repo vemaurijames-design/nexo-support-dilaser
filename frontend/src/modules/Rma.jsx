@@ -29,6 +29,8 @@ export default function Rma() {
   }
   useEffect(() => { load() }, [])
 
+  const [fotos, setFotos] = useState([])
+
   const save = async (e) => {
     e.preventDefault()
     setErr('')
@@ -149,7 +151,10 @@ export default function Rma() {
                 <input value={asunto} onChange={e => setAsunto(e.target.value)} />
               </div>
               {err && <div className="alert error">{err}</div>}
-              <div className="form-actions">
+              <label>Fotografías del daño (para el PDF y el fabricante)</label>
+          <input type="file" accept="image/*" multiple onChange={e => setFotos([...e.target.files])} />
+          {fotos.length > 0 && <p className="muted">{fotos.length} foto(s) lista(s) para adjuntar</p>}
+          <div className="form-actions">
                 <button type="button" className="btn ghost" onClick={() => setSendOpen(false)}>Cancelar</button>
                 <button className="btn" type="submit" disabled={sending}>
                   {sending ? 'Enviando…' : 'Enviar con PDF'}
@@ -176,6 +181,9 @@ export default function Rma() {
           <textarea rows={3} value={form.problemaReportado || ''} onChange={e => setForm({ ...form, problemaReportado: e.target.value })} />
           <label>ADDITIONAL DETAILS</label>
           <textarea rows={2} value={form.detallesAdicionales || ''} onChange={e => setForm({ ...form, detallesAdicionales: e.target.value })} />
+          <label>Fotografías del daño (puedes elegir varias)</label>
+          <input type="file" accept="image/*" multiple onChange={e => setFotos([...e.target.files])} />
+          {fotos.length > 0 && <p className="muted">{fotos.length} foto(s) seleccionada(s)</p>}
           <p>
             <button className="btn" type="submit">Guardar RMA</button>{' '}
             <button type="button" className="btn ghost" onClick={() => setOpen(false)}>Cancelar</button>
